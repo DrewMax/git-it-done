@@ -1,5 +1,22 @@
 var issueContainerEl = document.querySelector("#issues-container");
 var limitWarningEl = document.querySelector("#limit-warning");
+var repoNameEl = document.querySelector("#repo-name")
+
+var getRepoName = function() {
+    // grab repo name from url query string
+    var queryString = document.location.search;
+    var repoName = queryString.split("=")[1];
+
+    if (repoName) {
+        // display repo name on the page
+    repoNameEl.textContent = repoName;
+
+    getRepoIssues(repoName);
+    } else {
+        // if no repo was given, redirect to the homepage
+        document.location.replace("./index.html")
+    }
+}
 
 var displayWarning = function(repo) {
     //add text to the warning container
@@ -15,6 +32,7 @@ var displayWarning = function(repo) {
 
 var getRepoIssues = function(repo) {
     var apiurl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
+    
 
 fetch(apiurl).then(function(response) {
     //request was successful
@@ -23,22 +41,20 @@ fetch(apiurl).then(function(response) {
             displayIssues(data);
         
     // check if api has paginated issues
-    if (response.headers.get("link")) {
+    if (response.headers.get("Link")) {
         displayWarning(repo);
     }
         })
     } else {
-        alert("There was a problem, boo for you!")
+        document.location.replace("./index.html")
     }
 })
 }
 
-getRepoIssues("facebook/react")
-
 var displayIssues = function(issues) {
 
     if (issues.length === 0) {
-        issueContainerEl.textContent = "This repo is no open issues like Captain America";
+        issueContainerEl.textContent = "This repo has no open issues like Captain America";
         return;
     }
 
@@ -68,6 +84,9 @@ var displayIssues = function(issues) {
 
     // append to container
     issueEl.appendChild(typeEl);
- }
- issueContainerEl.appendChild(issueEl);
+
+    issueContainerEl.appendChild(issueEl);
+    }
 }
+
+getRepoName()
